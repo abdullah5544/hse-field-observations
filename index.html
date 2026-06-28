@@ -502,9 +502,8 @@ function buildMsg(d,toLabel,imgs){
   const sev=SEV[d.sev]?.l||"";
   const sevI=SEV[d.sev]?.i||"";
   const sevC={low:"#3B82F6",medium:"#EAB308",high:"#F97316",critical:"#EF4444"}[d.sev]||"#64748B";
-  const maxImgs=imgs&&imgs.length?imgs.slice(0,4):[];
-  const photoSection=maxImgs.length
-    ? '<div style="background:#fff;border-radius:12px;padding:16px;margin-top:12px;border:1px solid #E2E8F0"><div style="font-weight:700;color:#1B3A2D;font-size:14px;margin-bottom:10px">📷 الصور المرفقة ('+imgs.length+' صورة'+(imgs.length>4?' — تعرض أول 4':'')+' )</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+maxImgs.map(p=>'<img src="'+p.u+'" style="width:140px;height:105px;object-fit:cover;border-radius:8px;border:2px solid #E2E8F0">').join("")+'</div></div>'
+  const photoSection=imgs&&imgs.length
+    ? '<div style="background:#FFF9C4;border-radius:12px;padding:14px 16px;margin-top:12px;border:2px solid #F59E0B"><div style="font-weight:700;color:#92400E;font-size:14px;margin-bottom:6px">📷 الصور المرفقة</div><div style="background:#fff;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:12px"><span style="font-size:32px">🖼️</span><div><div style="font-weight:700;color:#1B3A2D;font-size:16px">'+imgs.length+' صورة مرفقة</div><div style="color:#64748B;font-size:12px;margin-top:2px">تم حفظ الصور في النظام — يمكن الاطلاع عليها في السجل</div></div></div></div>'
     : "";
   return '<div dir="rtl" style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#F4F7F4;padding:16px;border-radius:12px">'
     +'<div style="background:linear-gradient(135deg,#1B3A2D,#2D5A3D);color:#fff;padding:18px;border-radius:12px;margin-bottom:14px;text-align:center">'
