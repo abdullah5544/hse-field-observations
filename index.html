@@ -17,6 +17,7 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#EEF2F7;min-heigh
 .tabs-inner{max-width:680px;margin:0 auto;display:flex}
 .tab{padding:13px 18px;font-size:13px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;background:transparent;color:#64748B;border-bottom:2.5px solid transparent;margin-bottom:-2px;font-family:inherit}
 .tab.active{background:#EFF6FF;color:#1B4F8A;border-bottom-color:#1B4F8A}
+.tab.locked{color:#94A3B8}
 .main{max-width:680px;margin:0 auto;padding:18px 12px 50px}
 .card{background:#fff;border-radius:16px;box-shadow:0 1px 6px rgba(0,0,0,.07);border:1px solid #EEF0F4;overflow:hidden;margin-bottom:14px}
 .card-title{padding:13px 16px;font-weight:700;font-size:14px;color:#0B2545;border-bottom:1.5px solid #F1F5F9;background:#FAFBFD;display:flex;align-items:center;gap:7px}
@@ -26,7 +27,6 @@ input,select,textarea{width:100%;padding:11px 13px;border-radius:10px;font-size:
 input:focus,select:focus,textarea:focus{border-color:#1B4F8A;background:#fff}
 textarea{resize:vertical}
 .err{color:#EF4444;font-size:11px;margin-top:4px}
-.field{margin-bottom:0}
 .gps-row{display:flex;gap:10px;align-items:center}
 .gps-display{flex:1;background:#F8FAFC;border:1.5px solid #CBD5E1;border-radius:10px;padding:11px 14px;font-size:13px;color:#94A3B8}
 .gps-display.set{color:#0B2545}
@@ -113,8 +113,35 @@ textarea{resize:vertical}
 .photo-log-grid{display:flex;flex-wrap:wrap;gap:8px}
 .photo-log-grid img{width:90px;height:90px;object-fit:cover;border-radius:10px;border:2px solid #E2E8F0}
 .btn-del{width:100%;margin-top:8px;background:#FEF2F2;color:#EF4444;border:1.5px solid #FECACA;border-radius:12px;padding:13px;font-weight:700;cursor:pointer;font-size:14px;font-family:inherit}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.blink{animation:blink 1s infinite}
+
+/* ── PIN Modal ── */
+.pin-overlay{position:fixed;inset:0;background:rgba(11,37,69,.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.pin-box{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.pin-icon{font-size:48px;margin-bottom:12px}
+.pin-title{font-size:18px;font-weight:800;color:#0B2545;margin-bottom:4px}
+.pin-sub{font-size:13px;color:#64748B;margin-bottom:24px}
+.pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:24px}
+.pin-dot{width:16px;height:16px;border-radius:50%;background:#E2E8F0;transition:background .2s}
+.pin-dot.filled{background:#1B4F8A}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pin-key{background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:14px;padding:16px;font-size:20px;font-weight:700;cursor:pointer;color:#1E293B;font-family:inherit;transition:all .1s}
+.pin-key:active{background:#EFF6FF;border-color:#1B4F8A;transform:scale(.95)}
+.pin-key.zero{grid-column:2}
+.pin-key.del{background:#FEF2F2;border-color:#FECACA;color:#EF4444;font-size:16px}
+.pin-error{color:#EF4444;font-size:13px;font-weight:600;margin-top:12px;min-height:20px}
+.pin-shake{animation:shake .4s}
+.lock-icon{font-size:14px;opacity:.6}
+.change-pin-btn{background:none;border:none;color:#94A3B8;font-size:12px;cursor:pointer;margin-top:14px;font-family:inherit;text-decoration:underline}
+
+/* change pin modal */
+.pin-change-box{background:#fff;border-radius:24px;padding:28px;width:100%;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.pin-change-input{width:100%;padding:13px;border-radius:10px;border:1.5px solid #CBD5E1;font-size:18px;text-align:center;letter-spacing:8px;font-family:inherit;margin:10px 0}
+.pin-change-input:focus{outline:none;border-color:#1B4F8A}
+.pin-change-btns{display:flex;gap:10px;margin-top:14px}
+.btn-cancel{flex:1;background:#F1F5F9;color:#64748B;border:none;border-radius:10px;padding:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-save-pin{flex:1;background:#1B4F8A;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit}
+
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 </style>
 </head>
 <body>
@@ -133,8 +160,8 @@ textarea{resize:vertical}
 <div class="tabs">
   <div class="tabs-inner">
     <button class="tab active" onclick="switchTab('new')">➕ ملاحظة جديدة</button>
-    <button class="tab" onclick="switchTab('records')">📋 السجل</button>
-    <button class="tab" onclick="switchTab('stats')">📊 إحصائيات</button>
+    <button class="tab locked" onclick="requirePin('records')">📋 السجل 🔒</button>
+    <button class="tab locked" onclick="requirePin('stats')">📊 إحصائيات 🔒</button>
   </div>
 </div>
 
@@ -146,8 +173,55 @@ textarea{resize:vertical}
 
 <input type="file" id="photo-input" accept="image/*" multiple style="display:none">
 
+<!-- PIN Modal -->
+<div class="pin-overlay" id="pin-overlay" style="display:none">
+  <div class="pin-box" id="pin-box">
+    <div class="pin-icon">🔐</div>
+    <div class="pin-title">منطقة محمية</div>
+    <div class="pin-sub">أدخل الرقم السري للدخول</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key zero" onclick="pinKey('0')">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <button class="change-pin-btn" onclick="showChangePin()">تغيير الرقم السري</button>
+  </div>
+
+  <!-- Change PIN sub-box -->
+  <div class="pin-change-box" id="pin-change-box" style="display:none">
+    <div class="pin-icon">🔑</div>
+    <div class="pin-title">تغيير الرقم السري</div>
+    <div class="pin-sub">أدخل الرقم السري الحالي ثم الجديد</div>
+    <label style="text-align:right;display:block;margin-top:10px">الرقم الحالي</label>
+    <input type="password" id="old-pin" class="pin-change-input" maxlength="4" inputmode="numeric" placeholder="••••">
+    <label style="text-align:right;display:block;margin-top:6px">الرقم الجديد</label>
+    <input type="password" id="new-pin" class="pin-change-input" maxlength="4" inputmode="numeric" placeholder="••••">
+    <label style="text-align:right;display:block;margin-top:6px">تأكيد الرقم الجديد</label>
+    <input type="password" id="confirm-pin" class="pin-change-input" maxlength="4" inputmode="numeric" placeholder="••••">
+    <div class="pin-error" id="change-pin-error"></div>
+    <div class="pin-change-btns">
+      <button class="btn-cancel" onclick="hideChangePin()">إلغاء</button>
+      <button class="btn-save-pin" onclick="saveNewPin()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ── Config ──────────────────────────────────────────────────────
 const SVC  = "service_tle1asp";
 const TPL  = "template_x1mnw59";
 const PKEY = "kUBNIWqdmXBsoxdSd";
@@ -171,18 +245,94 @@ const RCPS = [
   {id:"safety",    label:"مسؤول السلامة",icon:"🦺"},
 ];
 
-// ── State ────────────────────────────────────────────────────────
 let records = JSON.parse(localStorage.getItem("hse_recs")||"[]");
-let photos  = [];
-let selSev  = "";
-let rcps    = Object.fromEntries(RCPS.map(r=>[r.id,{sel:false,email:""}]));
-let viewRec = null;
-let curTab  = "new";
+let photos=[], selSev="", rcps=Object.fromEntries(RCPS.map(r=>[r.id,{sel:false,email:""}]));
+let viewRec=null, curTab="new";
 
-// ── EmailJS init ─────────────────────────────────────────────────
+// ── PIN State ────────────────────────────────────────────────────
+let pinEntry = "";
+let pendingTab = "";
+let unlocked = false;
+let unlockTimer = null;
+const DEFAULT_PIN = "1234";
+
+function getPin(){ return localStorage.getItem("hse_pin") || DEFAULT_PIN; }
+
+function requirePin(tab){
+  if(unlocked){ switchTab(tab); return; }
+  pendingTab = tab;
+  pinEntry = "";
+  updatePinDots();
+  g("pin-error").textContent = "";
+  g("pin-overlay").style.display = "flex";
+  g("pin-box").style.display = "block";
+  g("pin-change-box").style.display = "none";
+}
+
+function pinKey(k){
+  if(pinEntry.length >= 4) return;
+  pinEntry += k;
+  updatePinDots();
+  if(pinEntry.length === 4) setTimeout(checkPin, 120);
+}
+
+function pinDel(){
+  pinEntry = pinEntry.slice(0,-1);
+  updatePinDots();
+  g("pin-error").textContent = "";
+}
+
+function updatePinDots(){
+  for(let i=0;i<4;i++){
+    g("d"+i).classList.toggle("filled", i < pinEntry.length);
+  }
+}
+
+function checkPin(){
+  if(pinEntry === getPin()){
+    unlocked = true;
+    g("pin-overlay").style.display = "none";
+    switchTab(pendingTab);
+    // Auto-lock after 10 minutes
+    clearTimeout(unlockTimer);
+    unlockTimer = setTimeout(()=>{ unlocked=false; }, 10*60*1000);
+  } else {
+    g("pin-box").classList.add("pin-shake");
+    g("pin-error").textContent = "❌ رقم سري خاطئ، حاول مرة أخرى";
+    pinEntry = "";
+    updatePinDots();
+    setTimeout(()=>g("pin-box").classList.remove("pin-shake"), 400);
+  }
+}
+
+function showChangePin(){
+  g("pin-box").style.display = "none";
+  g("pin-change-box").style.display = "block";
+  g("old-pin").value=""; g("new-pin").value=""; g("confirm-pin").value="";
+  g("change-pin-error").textContent="";
+}
+
+function hideChangePin(){
+  g("pin-change-box").style.display = "none";
+  g("pin-box").style.display = "block";
+  pinEntry=""; updatePinDots(); g("pin-error").textContent="";
+}
+
+function saveNewPin(){
+  const old = g("old-pin").value.trim();
+  const nw  = g("new-pin").value.trim();
+  const cf  = g("confirm-pin").value.trim();
+  const err = g("change-pin-error");
+  if(old !== getPin()){ err.textContent="❌ الرقم الحالي غير صحيح"; return; }
+  if(nw.length < 4){ err.textContent="❌ الرقم الجديد يجب أن يكون 4 أرقام"; return; }
+  if(!/^\d{4}$/.test(nw)){ err.textContent="❌ أدخل أرقام فقط"; return; }
+  if(nw !== cf){ err.textContent="❌ الرقم الجديد غير متطابق"; return; }
+  localStorage.setItem("hse_pin", nw);
+  err.style.color="#16A34A"; err.textContent="✅ تم تغيير الرقم السري بنجاح!";
+  setTimeout(()=>{ g("pin-overlay").style.display="none"; unlocked=true; switchTab(pendingTab); }, 1000);
+}
+
 emailjs.init({publicKey: PKEY});
-
-// ── Helpers ──────────────────────────────────────────────────────
 function g(id){return document.getElementById(id)}
 function val(id){const el=g(id);return el?el.value.trim():"";}
 function saveRecs(){localStorage.setItem("hse_recs",JSON.stringify(records));}
@@ -190,51 +340,67 @@ function fmtDate(iso){return new Date(iso).toLocaleString("ar-SA",{dateStyle:"sh
 
 function buildMsg(data,toLabel){
   const sev=SEV[data.sev]?.label||"";
-  return "📋 ملاحظة ميدانية جديدة\n"+
-    "─────────────────────────\n"+
-    "📍 الموقع      : "+data.site+"\n"+
-    "🗂 نوع الزيارة : "+data.vtype+"\n"+
-    "👷 المفتش      : "+data.insp+"\n"+
-    "📌 الإحداثيات  : "+(data.gps||"غير محدد")+"\n"+
-    (data.locDesc?"📝 وصف الموقع  : "+data.locDesc+"\n":"")+
-    "\n─────────────────────────\n"+
-    "📋 تفاصيل الملاحظة\n"+
-    "─────────────────────────\n"+
-    "النوع          : "+data.otype+"\n"+
-    "الوصف          : "+data.odesc+"\n"+
-    "درجة الخطورة   : "+sev+"\n"+
-    (data.action?"الإجراء        : "+data.action+"\n":"")+
-    "\n─────────────────────────\n"+
-    "📅 التاريخ     : "+new Date().toLocaleString("ar-SA")+"\n"+
-    "👤 المُرسَل إلى : "+toLabel+"\n"+
-    "─────────────────────────\n"+
+  return "📋 ملاحظة ميدانية جديدة
+"+
+    "─────────────────────────
+"+
+    "📍 الموقع      : "+data.site+"
+"+
+    "🗂 نوع الزيارة : "+data.vtype+"
+"+
+    "👷 المفتش      : "+data.insp+"
+"+
+    "📌 الإحداثيات  : "+(data.gps||"غير محدد")+"
+"+
+    (data.locDesc?"📝 وصف الموقع  : "+data.locDesc+"
+":"")+
+    "
+─────────────────────────
+"+
+    "📋 تفاصيل الملاحظة
+"+
+    "─────────────────────────
+"+
+    "النوع          : "+data.otype+"
+"+
+    "الوصف          : "+data.odesc+"
+"+
+    "درجة الخطورة   : "+sev+"
+"+
+    (data.action?"الإجراء        : "+data.action+"
+":"")+
+    "
+─────────────────────────
+"+
+    "📅 التاريخ     : "+new Date().toLocaleString("ar-SA")+"
+"+
+    "👤 المُرسَل إلى : "+toLabel+"
+"+
+    "─────────────────────────
+"+
     "نظام رصد الملاحظات الميدانية";
 }
 
-// ── Tab switch ───────────────────────────────────────────────────
 function switchTab(t){
   curTab=t;
-  ["new","records","stats"].forEach(k=>{
-    g("tab-"+k).style.display=k===t?"block":"none";
-    document.querySelectorAll(".tab").forEach((el,i)=>{
-      el.classList.toggle("active",["new","records","stats"][i]===t);
-    });
+  ["new","records","stats"].forEach(k=>{ g("tab-"+k).style.display=k===t?"block":"none"; });
+  document.querySelectorAll(".tab").forEach((el,i)=>{
+    el.classList.toggle("active",["new","records","stats"][i]===t);
   });
-  if(t==="new")    renderNew();
-  if(t==="records")renderRecords();
-  if(t==="stats")  renderStats();
+  if(t==="new")     renderNew();
+  if(t==="records") renderRecords();
+  if(t==="stats")   renderStats();
 }
 
-// ── Render New Form ──────────────────────────────────────────────
 function renderNew(){
   const el=g("tab-new");
   el.innerHTML=`
   <div class="card">
     <div class="card-title">🏢 بيانات الزيارة</div>
     <div class="card-body">
-      <div class="field"><label>اسم الموقع / المنشأة</label><input id="f-site" placeholder="مثال: مصنع الطاقة — الوحدة 3"><div id="e-site" class="err" style="display:none"></div></div>
-      <div class="field"><label>نوع الزيارة</label><select id="f-vtype"><option value="">— اختر النوع —</option>${VISIT_TYPES.map(v=>`<option>${v}</option>`).join("")}</select><div id="e-vtype" class="err" style="display:none"></div></div>
-      <div class="field"><label>المفتش / المراقب الميداني</label><input id="f-insp" placeholder="الاسم الكامل"><div id="e-insp" class="err" style="display:none"></div></div>
+      <div><label>اسم الموقع / المنشأة</label><input id="f-site" placeholder="مثال: مصنع الطاقة — الوحدة 3"><div id="e-site" class="err" style="display:none"></div></div>
+      <div><label>نوع الزيارة</label><select id="f-vtype"><option value="">— اختر النوع —</option>${VISIT_TYPES.map(v=>`<option>${v}</option>`).join("")}</select><div id="e-vtype" class="err" style="display:none"></div></div>
+      <div><label>المفتش / المراقب الميداني</label><input id="f-insp" placeholder="الاسم الكامل"><div id="e-insp" class="err" style="display:none"></div></div>
     </div>
   </div>
   <div class="card">
@@ -244,7 +410,7 @@ function renderNew(){
         <div class="gps-display" id="gps-display">🛰️ لم يتم التحديد بعد</div>
         <button class="btn-gps" onclick="getGPS()">📡 تحديد</button>
       </div>
-      <div class="field"><label>وصف الموقع (اختياري)</label><input id="f-locdesc" placeholder="مثال: الطابق الثاني، قرب محطة الضخ"></div>
+      <div><label>وصف الموقع (اختياري)</label><input id="f-locdesc" placeholder="مثال: الطابق الثاني، قرب محطة الضخ"></div>
     </div>
   </div>
   <div class="card">
@@ -257,16 +423,16 @@ function renderNew(){
   <div class="card">
     <div class="card-title">📝 تفاصيل الملاحظة</div>
     <div class="card-body">
-      <div class="field"><label>نوع الملاحظة</label><select id="f-otype"><option value="">— اختر النوع —</option>${OBS_TYPES.map(v=>`<option>${v}</option>`).join("")}</select><div id="e-otype" class="err" style="display:none"></div></div>
-      <div class="field"><label>وصف الملاحظة التفصيلي</label><textarea id="f-odesc" rows="3" placeholder="اشرح الملاحظة بالتفصيل..."></textarea><div id="e-odesc" class="err" style="display:none"></div></div>
-      <div class="field">
+      <div><label>نوع الملاحظة</label><select id="f-otype"><option value="">— اختر النوع —</option>${OBS_TYPES.map(v=>`<option>${v}</option>`).join("")}</select><div id="e-otype" class="err" style="display:none"></div></div>
+      <div><label>وصف الملاحظة التفصيلي</label><textarea id="f-odesc" rows="3" placeholder="اشرح الملاحظة بالتفصيل..."></textarea><div id="e-odesc" class="err" style="display:none"></div></div>
+      <div>
         <label>تصنيف درجة الخطورة</label>
         <div class="sev-grid">
           ${Object.entries(SEV).map(([k,s])=>`<button class="sev-btn" id="sev-${k}" onclick="setSev('${k}')"><span class="sev-icon">${s.icon}</span>${s.label}</button>`).join("")}
         </div>
         <div id="e-sev" class="err" style="display:none"></div>
       </div>
-      <div class="field"><label>الإجراء التصحيحي المقترح</label><textarea id="f-action" rows="2" placeholder="ما الإجراء المطلوب اتخاذه؟"></textarea></div>
+      <div><label>الإجراء التصحيحي المقترح</label><textarea id="f-action" rows="2" placeholder="ما الإجراء المطلوب اتخاذه؟"></textarea></div>
     </div>
   </div>
   <div class="card">
@@ -276,8 +442,7 @@ function renderNew(){
       ${RCPS.map(r=>`
       <div class="rcp-wrap" id="rcp-wrap-${r.id}">
         <button class="rcp-btn" onclick="toggleRcp('${r.id}')">
-          <span class="rcp-icon">${r.icon}</span>
-          <span>${r.label}</span>
+          <span class="rcp-icon">${r.icon}</span><span>${r.label}</span>
           <span class="rcp-check" id="rcp-check-${r.id}">⬜</span>
         </button>
         <div class="rcp-email-box" id="rcp-email-${r.id}" style="display:none">
@@ -289,8 +454,8 @@ function renderNew(){
       <div class="extra-box">
         <div class="extra-header">📬 بريد إضافي (اختياري)</div>
         <div class="extra-body">
-          <div class="field"><label>الاسم</label><input id="f-xname" placeholder="مثال: المدير التنفيذي" oninput="updatePreview()"></div>
-          <div class="field"><label>الإيميل</label><input type="email" id="f-xemail" placeholder="example@company.com" style="direction:ltr;text-align:left" oninput="updatePreview()"></div>
+          <div><label>الاسم</label><input id="f-xname" placeholder="مثال: المدير التنفيذي" oninput="updatePreview()"></div>
+          <div><label>الإيميل</label><input type="email" id="f-xemail" placeholder="example@company.com" style="direction:ltr;text-align:left" oninput="updatePreview()"></div>
         </div>
       </div>
       <div id="preview-box" style="display:none" class="preview-box">
@@ -299,50 +464,33 @@ function renderNew(){
       </div>
     </div>
   </div>
-  <button class="btn-submit" id="btn-submit" onclick="submitForm()">📡 رفع الملاحظة وإرسال الإيميلات</button>
-  `;
-  photos=[];
-  selSev="";
-  rcps=Object.fromEntries(RCPS.map(r=>[r.id,{sel:false,email:""}]));
+  <button class="btn-submit" id="btn-submit" onclick="submitForm()">📡 رفع الملاحظة وإرسال الإيميلات</button>`;
+  photos=[];selSev="";rcps=Object.fromEntries(RCPS.map(r=>[r.id,{sel:false,email:""}]));
   g("photo-input").onchange=handlePhoto;
   updateBadge();
 }
 
 function getGPS(){
-  const d=g("gps-display");
-  d.textContent="⏳ جارٍ التحديد...";
+  const d=g("gps-display");d.textContent="⏳ جارٍ التحديد...";
   navigator.geolocation?.getCurrentPosition(
-    ({coords})=>{const txt=coords.latitude.toFixed(5)+", "+coords.longitude.toFixed(5);d.textContent=txt;d.className="gps-display set";},
-    ()=>{d.textContent="تعذّر الحصول على الموقع";},
-    {enableHighAccuracy:true}
+    ({coords})=>{const t=coords.latitude.toFixed(5)+", "+coords.longitude.toFixed(5);d.textContent=t;d.className="gps-display set";},
+    ()=>{d.textContent="تعذّر الحصول على الموقع";},{enableHighAccuracy:true}
   );
 }
-
 function handlePhoto(e){
   Array.from(e.target.files).forEach(file=>{
-    const r=new FileReader();
-    r.onload=ev=>{photos.push({name:file.name,url:ev.target.result});renderPhotos();};
-    r.readAsDataURL(file);
-  });
-  e.target.value="";
+    const r=new FileReader();r.onload=ev=>{photos.push({name:file.name,url:ev.target.result});renderPhotos();};r.readAsDataURL(file);
+  });e.target.value="";
 }
-
 function renderPhotos(){
-  const grid=g("photo-grid");
-  grid.innerHTML=photos.map((p,i)=>`<div class="photo-wrap"><img src="${p.url}" alt="${p.name}"><button class="photo-del" onclick="delPhoto(${i})">×</button></div>`).join("");
+  g("photo-grid").innerHTML=photos.map((p,i)=>`<div class="photo-wrap"><img src="${p.url}"><button class="photo-del" onclick="delPhoto(${i})">x</button></div>`).join("");
 }
-
 function delPhoto(i){photos.splice(i,1);renderPhotos();}
-
 function setSev(k){
   selSev=k;
-  Object.keys(SEV).forEach(s=>{
-    const btn=g("sev-"+s);
-    btn.className="sev-btn"+(s===k?" active-"+s:"");
-  });
-  hideErr("e-sev");
+  Object.keys(SEV).forEach(s=>{g("sev-"+s).className="sev-btn"+(s===k?" active-"+s:"");});
+  g("e-sev").style.display="none";
 }
-
 function toggleRcp(id){
   rcps[id].sel=!rcps[id].sel;
   g("rcp-wrap-"+id).classList.toggle("selected",rcps[id].sel);
@@ -350,29 +498,17 @@ function toggleRcp(id){
   g("rcp-email-"+id).style.display=rcps[id].sel?"block":"none";
   updatePreview();
 }
-
 function updatePreview(){
   const list=[];
-  RCPS.forEach(r=>{
-    if(rcps[r.id].sel){
-      rcps[r.id].email=g("em-"+r.id)?.value.trim()||"";
-      if(rcps[r.id].email)list.push({icon:r.icon,label:r.label,email:rcps[r.id].email});
-    }
-  });
+  RCPS.forEach(r=>{if(rcps[r.id].sel){rcps[r.id].email=g("em-"+r.id)?.value.trim()||"";if(rcps[r.id].email)list.push({icon:r.icon,label:r.label,email:rcps[r.id].email});}});
   const xe=g("f-xemail")?.value.trim()||"";
   if(xe)list.push({icon:"📬",label:g("f-xname")?.value.trim()||"إضافي",email:xe});
   const box=g("preview-box");
-  if(list.length>0){
-    box.style.display="block";
-    g("preview-list").innerHTML=list.map(l=>`<div class="preview-row"><span>${l.icon}</span><b>${l.label}</b><span class="preview-email">${l.email}</span></div>`).join("");
-  } else {
-    box.style.display="none";
-  }
+  if(list.length>0){box.style.display="block";g("preview-list").innerHTML=list.map(l=>`<div class="preview-row"><span>${l.icon}</span><b>${l.label}</b><span class="preview-email">${l.email}</span></div>`).join("");}
+  else box.style.display="none";
 }
-
 function showErr(id,msg){const el=g(id);if(el){el.textContent="⚠ "+msg;el.style.display="block";}}
 function hideErr(id){const el=g(id);if(el)el.style.display="none";}
-
 function validate(){
   let ok=true;
   if(!val("f-site")){showErr("e-site","مطلوب");ok=false;}else hideErr("e-site");
@@ -381,129 +517,65 @@ function validate(){
   if(!val("f-otype")){showErr("e-otype","مطلوب");ok=false;}else hideErr("e-otype");
   if(!val("f-odesc")){showErr("e-odesc","مطلوب");ok=false;}else hideErr("e-odesc");
   if(!selSev){showErr("e-sev","اختر درجة الخطورة");ok=false;}else hideErr("e-sev");
-  RCPS.forEach(r=>{
-    if(rcps[r.id].sel&&!rcps[r.id].email.trim()){showErr("e-em-"+r.id,"أدخل الإيميل");ok=false;}
-    else hideErr("e-em-"+r.id);
-  });
+  RCPS.forEach(r=>{if(rcps[r.id].sel&&!rcps[r.id].email.trim()){showErr("e-em-"+r.id,"أدخل الإيميل");ok=false;}else hideErr("e-em-"+r.id);});
   const anyRcp=RCPS.some(r=>rcps[r.id].sel)||(g("f-xemail")?.value.trim()||"");
   if(!anyRcp){g("e-norcp").style.display="block";ok=false;}else g("e-norcp").style.display="none";
   return ok;
 }
-
 async function submitForm(){
   if(!validate())return;
-  const btn=g("btn-submit");
-  btn.disabled=true;btn.textContent="⏳ جارٍ الإرسال...";
-
-  const data={
-    site:val("f-site"),vtype:val("f-vtype"),insp:val("f-insp"),
-    gps:g("gps-display").textContent.includes(",")? g("gps-display").textContent:"",
-    locDesc:val("f-locdesc"),otype:val("f-otype"),odesc:val("f-odesc"),
-    sev:selSev,action:val("f-action"),
-  };
+  const btn=g("btn-submit");btn.disabled=true;btn.textContent="⏳ جارٍ الإرسال...";
+  const data={site:val("f-site"),vtype:val("f-vtype"),insp:val("f-insp"),
+    gps:g("gps-display").textContent.includes(",")?g("gps-display").textContent:"",
+    locDesc:val("f-locdesc"),otype:val("f-otype"),odesc:val("f-odesc"),sev:selSev,action:val("f-action")};
   const targets=[];
   RCPS.forEach(r=>{if(rcps[r.id].sel&&rcps[r.id].email.trim())targets.push({label:r.label,icon:r.icon,email:rcps[r.id].email.trim()});});
-  const xe=val("f-xemail");
-  if(xe)targets.push({label:val("f-xname")||"إضافي",icon:"📬",email:xe});
-
-  const sev=SEV[selSev]?.label||"";
-  const results=[];
+  const xe=val("f-xemail");if(xe)targets.push({label:val("f-xname")||"إضافي",icon:"📬",email:xe});
+  const sev=SEV[selSev]?.label||"";const results=[];
   for(const t of targets){
-    try{
-      await emailjs.send(SVC,TPL,{
-        to_email:t.email, to_name:t.label,
-        subject:"ملاحظة ميدانية ["+sev+"] — "+data.site,
-        message:buildMsg(data,t.label),
-      });
-      results.push({...t,ok:true});
-    }catch(e){
-      results.push({...t,ok:false,err:String(e.text||e.message||e)});
-    }
+    try{await emailjs.send(SVC,TPL,{to_email:t.email,to_name:t.label,subject:"ملاحظة ميدانية ["+sev+"] — "+data.site,message:buildMsg(data,t.label)});results.push({...t,ok:true});}
+    catch(e){results.push({...t,ok:false,err:String(e.text||e.message||e)});}
   }
-
   const rec={...data,id:Date.now(),createdAt:new Date().toISOString(),photos:[...photos],emailResults:results};
   records.unshift(rec);saveRecs();updateBadge();
-
   const anyOk=results.some(r=>r.ok);
-  g("tab-new").innerHTML=`
-  <div class="result-box ${anyOk?"ok":"fail"}">
+  g("tab-new").innerHTML=`<div class="result-box ${anyOk?"ok":"fail"}">
     <div class="result-title">${anyOk?"✅ تم الإرسال بنجاح!":"❌ فشل الإرسال"}</div>
-    ${results.map(r=>`
-    <div class="result-item ${r.ok?"ok":"fail"}">
-      <span style="font-size:20px">${r.ok?"✅":"❌"}</span>
-      <span class="result-label">${r.icon} ${r.label}</span>
-      <span class="result-email">${r.email}</span>
-      <span class="result-status">${r.ok?"أُرسل ✓":r.err||"فشل"}</span>
-    </div>`).join("")}
-    <button class="btn-new" onclick="renderNew();switchTab('new')">➕ ملاحظة جديدة</button>
-  </div>`;
+    ${results.map(r=>`<div class="result-item ${r.ok?"ok":"fail"}"><span style="font-size:20px">${r.ok?"✅":"❌"}</span><span class="result-label">${r.icon} ${r.label}</span><span class="result-email">${r.email}</span><span class="result-status">${r.ok?"أُرسل ✓":r.err||"فشل"}</span></div>`).join("")}
+    <button class="btn-new" onclick="renderNew();switchTab('new')">➕ ملاحظة جديدة</button></div>`;
 }
+function updateBadge(){const b=g("rec-badge");if(records.length>0){b.textContent=records.length+" ملاحظة";b.style.display="inline";}else b.style.display="none";}
 
-function updateBadge(){
-  const b=g("rec-badge");
-  if(records.length>0){b.textContent=records.length+" ملاحظة";b.style.display="inline";}
-  else b.style.display="none";
-}
-
-// ── Records ──────────────────────────────────────────────────────
 function renderRecords(){
   const el=g("tab-records");
   if(viewRec){renderDetail(el);return;}
-  if(records.length===0){
-    el.innerHTML=`<div class="empty"><div class="empty-icon">📋</div><div class="empty-msg">لا توجد ملاحظات بعد</div><div class="empty-sub">أضف أول ملاحظة من تبويب ➕ جديدة</div></div>`;
-    return;
-  }
+  if(records.length===0){el.innerHTML=`<div class="empty"><div class="empty-icon">📋</div><div class="empty-msg">لا توجد ملاحظات بعد</div><div class="empty-sub">أضف أول ملاحظة من تبويب ➕ جديدة</div></div>`;return;}
   el.innerHTML=records.map((rec,i)=>{
-    const sev=SEV[rec.sev]||{};
-    const sent=rec.emailResults?`📧 ${rec.emailResults.filter(r=>r.ok).length}/${rec.emailResults.length} أُرسل`:"";
-    return `<div class="rec-card" onclick="openRec(${i})">
-      <div class="rec-top"><span class="rec-site">${rec.site}</span><span class="sev-badge" style="background:${sev.color}22;color:${sev.color};border:1px solid ${sev.color}55">${sev.label||"—"}</span></div>
-      <div class="rec-type">${rec.otype}</div>
-      <div class="rec-meta"><span>👷 ${rec.insp}</span><span>🕐 ${fmtDate(rec.createdAt)}</span><span style="color:${rec.emailResults?.every(r=>r.ok)?"#16A34A":"#EF4444"}">${sent}</span></div>
-    </div>`;
+    const sev=SEV[rec.sev]||{};const sent=rec.emailResults?`📧 ${rec.emailResults.filter(r=>r.ok).length}/${rec.emailResults.length} أُرسل`:"";
+    return `<div class="rec-card" onclick="openRec(${i})"><div class="rec-top"><span class="rec-site">${rec.site}</span><span class="sev-badge" style="background:${sev.color}22;color:${sev.color};border:1px solid ${sev.color}55">${sev.label||"—"}</span></div><div class="rec-type">${rec.otype}</div><div class="rec-meta"><span>👷 ${rec.insp}</span><span>🕐 ${fmtDate(rec.createdAt)}</span><span style="color:${rec.emailResults?.every(r=>r.ok)?"#16A34A":"#EF4444"}">${sent}</span></div></div>`;
   }).join("");
 }
-
 function openRec(i){viewRec=records[i];renderRecords();}
-
 function renderDetail(el){
   const rec=viewRec;const sev=SEV[rec.sev]||{};
-  el.innerHTML=`
-  <button class="back-btn" onclick="viewRec=null;renderRecords()">← رجوع للسجل</button>
+  el.innerHTML=`<button class="back-btn" onclick="viewRec=null;renderRecords()">← رجوع للسجل</button>
   <div class="detail-header" style="background:linear-gradient(135deg,${sev.color}18,${sev.color}06);border:2px solid ${sev.color}40">
-    <div class="detail-top">
-      <span class="detail-site">${rec.site}</span>
-      <span class="sev-badge" style="background:${sev.color};color:#fff;padding:4px 14px">${sev.icon} ${sev.label}</span>
-    </div>
+    <div class="detail-top"><span class="detail-site">${rec.site}</span><span class="sev-badge" style="background:${sev.color};color:#fff;padding:4px 14px">${sev.icon} ${sev.label}</span></div>
     <div class="detail-meta">${rec.vtype} · ${fmtDate(rec.createdAt)}</div>
   </div>
-  ${[["👷 المفتش",rec.insp],["📋 نوع الملاحظة",rec.otype],["📝 التفاصيل",rec.odesc],["🔧 الإجراء المقترح",rec.action||"—"],["📍 الموقع",rec.gps||rec.locDesc||"—"]].map(([l,v])=>`
-  <div class="detail-row"><div class="detail-row-label">${l}</div><div class="detail-row-val">${v}</div></div>`).join("")}
-  ${rec.emailResults?.length?`<div class="email-log"><div class="email-log-title">📧 سجل إرسال الإيميلات</div>
-  ${rec.emailResults.map(r=>`<div class="email-log-row ${r.ok?"ok":"fail"}"><span>${r.ok?"✅":"❌"}</span><span style="font-weight:600">${r.icon} ${r.label}</span><span style="color:#64748B;direction:ltr;flex:1;font-size:12px">${r.email}</span><span style="font-size:12px;font-weight:600;color:${r.ok?"#16A34A":"#EF4444"}">${r.ok?"أُرسل":"فشل"}</span></div>`).join("")}
-  </div>`:""}
-  ${rec.photos?.length?`<div class="photo-log"><div class="photo-log-title">📷 الصور</div><div class="photo-log-grid">${rec.photos.map(p=>`<img src="${p.url}" alt="${p.name}">`).join("")}</div></div>`:""}
+  ${[["👷 المفتش",rec.insp],["📋 نوع الملاحظة",rec.otype],["📝 التفاصيل",rec.odesc],["🔧 الإجراء المقترح",rec.action||"—"],["📍 الموقع",rec.gps||rec.locDesc||"—"]].map(([l,v])=>`<div class="detail-row"><div class="detail-row-label">${l}</div><div class="detail-row-val">${v}</div></div>`).join("")}
+  ${rec.emailResults?.length?`<div class="email-log"><div class="email-log-title">📧 سجل إرسال الإيميلات</div>${rec.emailResults.map(r=>`<div class="email-log-row ${r.ok?"ok":"fail"}"><span>${r.ok?"✅":"❌"}</span><span style="font-weight:600">${r.icon} ${r.label}</span><span style="color:#64748B;direction:ltr;flex:1;font-size:12px">${r.email}</span><span style="font-size:12px;font-weight:600;color:${r.ok?"#16A34A":"#EF4444"}">${r.ok?"أُرسل":"فشل"}</span></div>`).join("")}</div>`:""}
+  ${rec.photos?.length?`<div class="photo-log"><div class="photo-log-title">📷 الصور</div><div class="photo-log-grid">${rec.photos.map(p=>`<img src="${p.url}">`).join("")}</div></div>`:""}
   <button class="btn-del" onclick="delRec()">🗑 حذف هذه الملاحظة</button>`;
 }
+function delRec(){records=records.filter(r=>r.id!==viewRec.id);saveRecs();updateBadge();viewRec=null;renderRecords();}
 
-function delRec(){
-  records=records.filter(r=>r.id!==viewRec.id);
-  saveRecs();updateBadge();viewRec=null;renderRecords();
-}
-
-// ── Stats ─────────────────────────────────────────────────────────
 function renderStats(){
   const el=g("tab-stats");
   const bySev=k=>records.filter(r=>r.sev===k).length;
   const byType=OBS_TYPES.map(t=>[t,records.filter(r=>r.otype===t).length]).filter(([,n])=>n>0).sort(([,a],[,b])=>b-a);
-  el.innerHTML=`
-  <div class="stat-grid">
-    ${[{k:"critical",l:"خطر فوري",i:"🔴"},{k:"high",l:"عالية",i:"🟧"},{k:"medium",l:"متوسطة",i:"🟨"},{k:"low",l:"منخفضة",i:"🟦"}].map(s=>`
-    <div class="stat-card" style="border-color:${SEV[s.k].color}30">
-      <div class="stat-icon">${s.i}</div>
-      <div class="stat-num" style="color:${SEV[s.k].color}">${bySev(s.k)}</div>
-      <div class="stat-label">${s.l}</div>
-    </div>`).join("")}
+  el.innerHTML=`<div class="stat-grid">
+    ${[{k:"critical",l:"خطر فوري",i:"🔴"},{k:"high",l:"عالية",i:"🟧"},{k:"medium",l:"متوسطة",i:"🟨"},{k:"low",l:"منخفضة",i:"🟦"}].map(s=>`<div class="stat-card" style="border-color:${SEV[s.k].color}30"><div class="stat-icon">${s.i}</div><div class="stat-num" style="color:${SEV[s.k].color}">${bySev(s.k)}</div><div class="stat-label">${s.l}</div></div>`).join("")}
   </div>
   <div class="card"><div class="card-title">📊 المجموع الكلي</div><div class="card-body" style="align-items:center;padding:20px"><div class="total-num">${records.length}</div><div style="color:#64748B;margin-top:6px">إجمالي الملاحظات المسجّلة</div></div></div>
   <div class="card"><div class="card-title">📋 الأنواع الأكثر رصداً</div><div class="card-body">
@@ -511,9 +583,7 @@ function renderStats(){
   </div></div>`;
 }
 
-// ── Init ──────────────────────────────────────────────────────────
-renderNew();
-updateBadge();
+renderNew();updateBadge();
 </script>
 </body>
 </html>
