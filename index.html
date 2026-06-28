@@ -188,12 +188,7 @@ textarea{resize:vertical;min-height:80px}
             <option>حملات المسح الميداني</option>
           </select>
           <div class="err-msg" id="e-vtype">⚠ مطلوب</div></div>
-        <div><label>9. اسم المفتش / المراقب الميداني *</label>
-          <input id="f-insp" type="text" placeholder="الاسم الكامل">
-          <div class="err-msg" id="e-insp">⚠ مطلوب</div></div>
-        <div><label>📧 إيميل المفتش / المراقب الميداني</label>
-          <input id="f-insp-email" type="email" placeholder="inspector@company.com" style="direction:ltr;text-align:left">
-          <div style="font-size:11px;color:#2D5A3D;margin-top:2px">سيصله نسخة تلقائية من الملاحظة</div></div>
+
       </div></div>
       <!-- GPS -->
       <div class="card"><div class="ct">📍 الموقع الجغرافي</div><div class="cb">
@@ -500,9 +495,7 @@ function saveEmails(){
 function updPreview(){
   var rows=[];
   RCPS.forEach(function(r){var em=g("em-"+r.id)&&g("em-"+r.id).value.trim();if(em)rows.push(r.icon+" <b>"+r.label+"</b> <span style='direction:ltr;font-size:11px'>"+em+"</span>");});
-  var ie=g("f-insp-email")&&g("f-insp-email").value.trim();
-  var inm=g("f-insp")&&g("f-insp").value.trim();
-  if(ie) rows.push("👤 <b>"+(inm||"المفتش")+"</b> <span style='direction:ltr;font-size:11px'>"+ie+"</span>");
+
   var box=g("preview-box");
   if(rows.length){box.style.display="block";g("preview-list").innerHTML=rows.map(function(r){return '<div style="font-size:12px;color:#166534;margin-bottom:3px">'+r+'</div>';}).join("");}
   else box.style.display="none";
@@ -519,13 +512,11 @@ function validate(){
   }
   chk("f-branch","e-branch");chk("f-ref","e-ref");chk("f-date","e-date");
   chk("f-region","e-region");chk("f-city","e-city");
-  chk("f-site","e-site");chk("f-vtype","e-vtype");chk("f-insp","e-insp");
+  chk("f-site","e-site");chk("f-vtype","e-vtype");
   chk("f-otype","e-otype");chk("f-odesc","e-odesc");
   if(!selSev){g("e-sev").style.display="block";ok=false;}else g("e-sev").style.display="none";
   var anyRcp=RCPS.some(function(r){return g("em-"+r.id)&&g("em-"+r.id).value.trim();});
-  if(!anyRcp&&!(g("f-insp-email")&&g("f-insp-email").value.trim())){
-    g("no-rcp").style.display="block";ok=false;
-  } else g("no-rcp").style.display="none";
+  if(!anyRcp){g("no-rcp").style.display="block";ok=false;} else g("no-rcp").style.display="none";
   return ok;
 }
 
@@ -581,14 +572,13 @@ function submitForm(){
     station:g("f-station").value.trim(),date:g("f-date").value.trim(),
     region:g("f-region").value.trim(),city:g("f-city").value.trim(),
     site:g("f-site").value.trim(),vtype:g("f-vtype").value.trim(),
-    insp:g("f-insp").value.trim(),inspEmail:g("f-insp-email").value.trim(),
+    
     gps:g("gps-val").classList.contains("set")?g("gps-val").textContent:"",
     loc:g("f-locdesc").value.trim(),otype:g("f-otype").value.trim(),
     odesc:g("f-odesc").value.trim(),sev:selSev,action:g("f-action").value.trim()
   };
   var targets=[];
   RCPS.forEach(function(r){var em=g("em-"+r.id)&&g("em-"+r.id).value.trim();if(em)targets.push({label:r.label,icon:r.icon,email:em});});
-  if(d.inspEmail) targets.push({label:d.insp||"المفتش",icon:"👤",email:d.inspEmail,copy:true});
   var sev=SEV[selSev]&&SEV[selSev].l||"";
   var subj="ملاحظة ["+sev+"] — "+d.site+(d.ref?" #"+d.ref:"");
   var imgData=photos.map(function(p){return p.u;});
@@ -631,7 +621,7 @@ function submitForm(){
 }
 function resetForm(){
   g("send-result").style.display="none";g("form-area").style.display="block";
-  ["f-ref","f-station","f-date","f-city","f-site","f-insp","f-insp-email","f-locdesc","f-odesc","f-action"].forEach(function(id){var el=g(id);if(el)el.value="";});
+  ["f-ref","f-station","f-date","f-city","f-site","f-locdesc","f-odesc","f-action"].forEach(function(id){var el=g(id);if(el)el.value="";});
   ["f-branch","f-region","f-vtype","f-otype"].forEach(function(id){var el=g(id);if(el)el.value="";});
   photos=[];selSev="";
   ["low","medium","high","critical"].forEach(function(s){var el=g("sv-"+s);if(el)el.className="sv";});
