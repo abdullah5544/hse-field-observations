@@ -135,6 +135,48 @@ textarea{resize:vertical;min-height:80px}
 .btn-save-p{flex:1;background:#2D5A3D;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
 .shake{animation:shake .35s}
+
+/* Dashboard */
+.dash-hero{background:linear-gradient(135deg,#0B2545 0%,#1B4F8A 60%,#2D5A3D 100%);border-radius:18px;padding:22px 18px;margin-bottom:16px;color:#fff}
+.dash-hero-title{font-size:13px;opacity:.8;margin-bottom:4px}
+.dash-hero-num{font-size:48px;font-weight:900;line-height:1}
+.dash-hero-sub{font-size:12px;opacity:.7;margin-top:4px}
+.dash-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.kpi{border-radius:14px;padding:14px 10px;text-align:center;border:2px solid transparent}
+.kpi-icon{font-size:26px}
+.kpi-num{font-size:28px;font-weight:900;line-height:1.1;margin-top:2px}
+.kpi-label{font-size:11px;margin-top:3px;opacity:.8;font-weight:600}
+.kpi-open{background:#FEF2F2;border-color:#FECACA;color:#991B1B}
+.kpi-progress{background:#FFFBEB;border-color:#FDE68A;color:#92400E}
+.kpi-closed{background:#F0FDF4;border-color:#BBF7D0;color:#166534}
+.dash-filters{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
+.dash-filter{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid #E2E8F0;background:#fff;color:#64748B;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s}
+.dash-filter.active{background:#1B3A2D;color:#fff;border-color:#1B3A2D}
+.obs-card{background:#fff;border-radius:16px;margin-bottom:12px;border:1.5px solid #E2E8F0;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden}
+.obs-card-top{padding:14px 16px}
+.obs-card-meta{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px}
+.obs-ref{font-size:11px;color:#94A3B8;font-weight:600}
+.obs-aging{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.aging-new{background:#FEF2F2;color:#EF4444}
+.aging-mid{background:#FFFBEB;color:#D97706}
+.aging-old{background:#F1F5F9;color:#64748B}
+.obs-site{font-weight:800;font-size:15px;color:#0B2545;margin-bottom:3px}
+.obs-type{font-size:12px;color:#64748B;margin-bottom:10px}
+.obs-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.status-bar{background:#F8FAFC;border-top:1.5px solid #E2E8F0;padding:12px 16px}
+.status-label{font-size:11px;color:#64748B;font-weight:600;margin-bottom:8px}
+.status-btns{display:flex;gap:8px}
+.status-btn{flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-weight:700;border:2px solid transparent;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center}
+.s-open{background:#FEF2F2;color:#EF4444;border-color:#FECACA}
+.s-open.active{background:#EF4444;color:#fff;border-color:#EF4444}
+.s-progress{background:#FFFBEB;color:#D97706;border-color:#FDE68A}
+.s-progress.active{background:#F59E0B;color:#fff;border-color:#F59E0B}
+.s-closed{background:#F0FDF4;color:#16A34A;border-color:#BBF7D0}
+.s-closed.active{background:#16A34A;color:#fff;border-color:#16A34A}
+.progress-track{height:6px;background:#E2E8F0;border-radius:3px;margin-top:10px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .5s}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#EF4444;display:inline-block;animation:pulse-dot 1.5s infinite;margin-left:5px}
 </style>
 </head>
 <body>
@@ -151,8 +193,9 @@ textarea{resize:vertical;min-height:80px}
 <div class="tabs">
   <div class="tabs-in">
     <button class="tab active" id="tab-btn-new"      onclick="goTab('new')">+ جديدة</button>
-    <button class="tab"        id="tab-btn-records"  onclick="tryLocked('records')">📋 السجل 🔒</button>
-    <button class="tab"        id="tab-btn-stats"    onclick="tryLocked('stats')">📊 إحصائيات 🔒</button>
+    <button class="tab"        id="tab-btn-records"   onclick="tryLocked('records')">📋 السجل 🔒</button>
+    <button class="tab"        id="tab-btn-dashboard" onclick="tryLocked('dashboard')">📡 المتابعة 🔒</button>
+    <button class="tab"        id="tab-btn-stats"     onclick="tryLocked('stats')">📊 إحصائيات 🔒</button>
     <button class="tab"        id="tab-btn-settings" onclick="tryLocked('settings')">⚙️ إعدادات 🔒</button>
   </div>
 </div>
@@ -344,6 +387,9 @@ textarea{resize:vertical;min-height:80px}
   <!-- ══ RECORDS ══ -->
   <div class="pane" id="pane-records"><div id="records-list"></div></div>
 
+  <!-- ══ DASHBOARD ══ -->
+  <div class="pane" id="pane-dashboard"><div id="dashboard-content"></div></div>
+
   <!-- ══ STATS ══ -->
   <div class="pane" id="pane-stats"><div id="stats-content"></div></div>
 
@@ -434,8 +480,9 @@ function goTab(t){
   document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
   g("pane-"+t).classList.add("active");
   g("tab-btn-"+t).classList.add("active");
-  if(t==="records")renderRecs();
-  if(t==="stats")  renderStats();
+  if(t==="records")  renderRecs();
+  if(t==="dashboard")renderDashboard();
+  if(t==="stats")    renderStats();
 }
 function tryLocked(t){
   if(unlocked){goTab(t);return;}
@@ -677,6 +724,97 @@ function renderDetail(){
     '<button class="btn-del" onclick="delRec()">🗑 حذف هذه الملاحظة</button>';
 }
 function delRec(){recs.splice(viewIdx,1);localStorage.setItem("hse",JSON.stringify(recs));updBadge();viewIdx=-1;renderRecs();}
+
+// Dashboard
+function renderDashboard(){
+  const el=g("dashboard-content");
+  const total=recs.length;
+  const open=recs.filter(r=>!r.status||r.status==="open").length;
+  const inprog=recs.filter(r=>r.status==="progress").length;
+  const closed=recs.filter(r=>r.status==="closed").length;
+  const rate=total?Math.round((closed/total)*100):0;
+  const activeFilter=window._dashFilter||"all";
+
+  let filtered=recs;
+  if(activeFilter==="open")    filtered=recs.filter(r=>!r.status||r.status==="open");
+  if(activeFilter==="progress")filtered=recs.filter(r=>r.status==="progress");
+  if(activeFilter==="closed")  filtered=recs.filter(r=>r.status==="closed");
+
+  function agingDays(iso){return Math.floor((Date.now()-new Date(iso))/(86400000));}
+  function agingBadge(d){
+    if(d<=2)  return '<span class="obs-aging aging-new">'+d+' يوم 🔥</span>';
+    if(d<=7)  return '<span class="obs-aging aging-mid">'+d+' أيام ⏳</span>';
+    return '<span class="obs-aging aging-old">'+d+' يوماً</span>';
+  }
+  function statusLabel(s){
+    if(s==="progress")return '<span style="background:#FEF9C3;color:#854D0E;border:1px solid #FDE68A;font-size:11px;padding:2px 10px;border-radius:20px;font-weight:700">🟡 قيد المعالجة</span>';
+    if(s==="closed")  return '<span style="background:#DCFCE7;color:#166534;border:1px solid #BBF7D0;font-size:11px;padding:2px 10px;border-radius:20px;font-weight:700">✅ مغلقة</span>';
+    return '<span style="background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;font-size:11px;padding:2px 10px;border-radius:20px;font-weight:700">🔴 مفتوحة</span>';
+  }
+  const SEV2={low:{l:"منخفضة",c:"#3B82F6",i:"🟦"},medium:{l:"متوسطة",c:"#EAB308",i:"🟨"},high:{l:"عالية",c:"#F97316",i:"🟧"},critical:{l:"خطر فوري",c:"#EF4444",i:"🔴"}};
+
+  el.innerHTML=
+  // Hero
+  '<div class="dash-hero">'
+  +'<div class="dash-hero-title">إجمالي الملاحظات المرصودة</div>'
+  +'<div class="dash-hero-num">'+total+'</div>'
+  +'<div style="margin-top:12px"><div style="display:flex;justify-content:space-between;font-size:11px;opacity:.8;margin-bottom:5px"><span>نسبة الإغلاق</span><span>'+rate+'%</span></div>'
+  +'<div style="height:8px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+rate+'%;background:#4ADE80;border-radius:4px;transition:width .8s"></div></div></div>'
+  +'</div>'
+  // KPIs
+  +'<div class="dash-kpis">'
+  +'<div class="kpi kpi-open"><div class="kpi-icon">🔴</div><div class="kpi-num">'+open+'</div><div class="kpi-label">مفتوحة</div></div>'
+  +'<div class="kpi kpi-progress"><div class="kpi-icon">🟡</div><div class="kpi-num">'+inprog+'</div><div class="kpi-label">قيد المعالجة</div></div>'
+  +'<div class="kpi kpi-closed"><div class="kpi-icon">✅</div><div class="kpi-num">'+closed+'</div><div class="kpi-label">مغلقة</div></div>'
+  +'</div>'
+  // Filters
+  +'<div class="dash-filters">'
+  +'<button class="dash-filter'+(activeFilter==="all"?" active":""")+(activeFilter==="all"?"":" ")+'onclick="setDashFilter('all')">الكل ('+total+')</button>'
+  +'<button class="dash-filter'+(activeFilter==="open"?" active":"")+'" onclick="setDashFilter('open')">🔴 مفتوحة ('+open+')</button>'
+  +'<button class="dash-filter'+(activeFilter==="progress"?" active":"")+'" onclick="setDashFilter('progress')">🟡 قيد المعالجة ('+inprog+')</button>'
+  +'<button class="dash-filter'+(activeFilter==="closed"?" active":"")+'" onclick="setDashFilter('closed')">✅ مغلقة ('+closed+')</button>'
+  +'</div>'
+  // Cards
+  +(filtered.length===0?'<div class="empty"><div style="font-size:48px">🎉</div><div style="font-weight:700;color:#334155;margin-top:12px;font-size:16px">لا توجد ملاحظات في هذه الفئة</div></div>':
+    filtered.map((rec,i)=>{
+      const realIdx=recs.indexOf(rec);
+      const sev=SEV2[rec.sev]||{};
+      const days=agingDays(rec.createdAt);
+      const curStatus=rec.status||"open";
+      return '<div class="obs-card">'
+        +'<div class="obs-card-top">'
+        +'<div class="obs-card-meta">'
+        +'<div>'+statusLabel(curStatus)+'</div>'
+        +agingBadge(days)
+        +'</div>'
+        +'<div class="obs-site">'+(rec.ref?"#"+rec.ref+" — ":"")+rec.site+'</div>'
+        +'<div class="obs-type">'+rec.otype+'</div>'
+        +'<div class="obs-badges">'
+        +'<span style="background:'+sev.c+'22;color:'+sev.c+';border:1px solid '+sev.c+'44;font-size:11px;padding:2px 10px;border-radius:20px;font-weight:700">'+sev.i+' '+(sev.l||"")+'</span>'
+        +'<span style="background:#F1F5F9;color:#475569;font-size:11px;padding:2px 10px;border-radius:20px">👤 '+rec.insp+'</span>'
+        +(rec.city?'<span style="background:#F1F5F9;color:#475569;font-size:11px;padding:2px 10px;border-radius:20px">🏙️ '+rec.city+'</span>':"")
+        +'</div>'
+        +'</div>'
+        +'<div class="status-bar">'
+        +'<div class="status-label">تحديث الحالة:</div>'
+        +'<div class="status-btns">'
+        +'<button class="status-btn s-open'+(curStatus==="open"?" active":"")+'" onclick="setStatus('+realIdx+','open')">🔴 مفتوحة</button>'
+        +'<button class="status-btn s-progress'+(curStatus==="progress"?" active":"")+'" onclick="setStatus('+realIdx+','progress')">🟡 معالجة</button>'
+        +'<button class="status-btn s-closed'+(curStatus==="closed"?" active":"")+'" onclick="setStatus('+realIdx+','closed')">✅ مغلقة</button>'
+        +'</div>'
+        +'</div>'
+        +'</div>';
+    }).join("")
+  );
+}
+
+function setDashFilter(f){window._dashFilter=f;renderDashboard();}
+function setStatus(idx,status){
+  recs[idx].status=status;
+  recs[idx].statusUpdated=new Date().toISOString();
+  localStorage.setItem("hse",JSON.stringify(recs));
+  renderDashboard();
+}
 
 // Stats
 function renderStats(){
