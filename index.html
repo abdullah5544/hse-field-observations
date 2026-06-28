@@ -482,23 +482,43 @@ function validate(){
   return ok;
 }
 
-function buildMsg(d,toLabel){
-  return "📋 ملاحظة ميدانية جديدة\n"+"─".repeat(28)+"\n"+
-    "🔢 الرقم المرجعي  : "+(d.ref||"—")+"\n"+
-    "📍 الموقع         : "+d.site+"\n"+
-    "🗂 نوع الزيارة    : "+d.vtype+"\n"+
-    "👤 المفتش         : "+d.insp+"\n"+
-    "📌 الإحداثيات     : "+(d.gps||"غير محدد")+"\n"+
-    (d.loc?"📝 وصف الموقع     : "+d.loc+"\n":"")+
-    "\n"+"─".repeat(28)+"\n"+
-    "النوع             : "+d.otype+"\n"+
-    "الوصف             : "+d.odesc+"\n"+
-    "درجة الخطورة      : "+(SEV[d.sev]?.l||"")+"\n"+
-    (d.action?"الإجراء المقترح   : "+d.action+"\n":"")+
-    "\n"+"─".repeat(28)+"\n"+
-    "📅 "+new Date().toLocaleString("ar-SA")+"\n"+
-    "👤 إلى: "+toLabel+"\n"+"─".repeat(28)+"\n"+
-    "نظام رصد الملاحظات الميدانية";
+function buildMsg(d,toLabel,imgs){
+  const sev=SEV[d.sev]?.l||"";
+  const sevI=SEV[d.sev]?.i||"";
+  const sevC={low:"#3B82F6",medium:"#EAB308",high:"#F97316",critical:"#EF4444"}[d.sev]||"#64748B";
+  const photoSection=imgs&&imgs.length
+    ? '<div style="background:#fff;border-radius:12px;padding:16px;margin-top:12px;border:1px solid #E2E8F0"><div style="font-weight:700;color:#1B3A2D;font-size:14px;margin-bottom:10px">📷 الصور المرفقة ('+imgs.length+' صورة)</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+imgs.map(p=>'<img src="'+p.u+'" style="width:150px;height:110px;object-fit:cover;border-radius:8px;border:2px solid #E2E8F0">').join("")+'</div></div>'
+    : "";
+  return '<div dir="rtl" style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#F4F7F4;padding:16px;border-radius:12px">'
+    +'<div style="background:linear-gradient(135deg,#1B3A2D,#2D5A3D);color:#fff;padding:18px;border-radius:12px;margin-bottom:14px;text-align:center">'
+    +'<div style="font-size:22px">🦺</div>'
+    +'<div style="font-size:17px;font-weight:800;margin-top:6px">ملاحظة ميدانية جديدة</div>'
+    +'<div style="font-size:11px;opacity:.8;margin-top:3px">HSE Field Observation System</div>'
+    +'</div>'
+    +'<div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #E2E8F0">'
+    +'<div style="font-weight:700;color:#1B3A2D;font-size:13px;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #E8F0E8">🏢 بيانات الزيارة</div>'
+    +(d.ref?'<div style="margin-bottom:7px"><div style="color:#64748B;font-size:11px">🔢 الرقم المرجعي</div><div style="font-weight:700;color:#1B3A2D;font-size:15px">#'+d.ref+'</div></div>':"")
+    +'<div style="margin-bottom:7px"><div style="color:#64748B;font-size:11px">📍 الموقع</div><div style="font-weight:600;color:#1E293B">'+d.site+'</div></div>'
+    +'<div style="margin-bottom:7px"><div style="color:#64748B;font-size:11px">🗂 نوع الزيارة</div><div style="color:#1E293B">'+d.vtype+'</div></div>'
+    +'<div style="margin-bottom:7px"><div style="color:#64748B;font-size:11px">👤 المفتش</div><div style="font-weight:600;color:#1E293B">'+d.insp+'</div></div>'
+    +(d.gps?'<div style="margin-bottom:7px"><div style="color:#64748B;font-size:11px">📌 الإحداثيات</div><div style="color:#1E293B;direction:ltr;text-align:right;font-size:12px">'+d.gps+'</div></div>':"")
+    +(d.loc?'<div style="margin-bottom:4px"><div style="color:#64748B;font-size:11px">📝 وصف الموقع</div><div style="color:#1E293B">'+d.loc+'</div></div>':"")
+    +'</div>'
+    +'<div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:2px solid '+sevC+'40">'
+    +'<div style="font-weight:700;color:#1B3A2D;font-size:13px;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #E8F0E8">📝 تفاصيل الملاحظة</div>'
+    +'<div style="margin-bottom:8px"><div style="color:#64748B;font-size:11px">النوع</div><div style="font-weight:600;color:#1E293B">'+d.otype+'</div></div>'
+    +'<div style="margin-bottom:10px"><div style="color:#64748B;font-size:11px">الوصف</div><div style="color:#1E293B;line-height:1.6;margin-top:3px">'+d.odesc+'</div></div>'
+    +'<div style="background:'+sevC+'15;border:2px solid '+sevC+'50;border-radius:10px;padding:10px 14px;display:inline-block">'
+    +'<span style="color:'+sevC+';font-weight:800;font-size:16px">'+sevI+' '+sev+'</span></div>'
+    +(d.action?'<div style="margin-top:10px"><div style="color:#64748B;font-size:11px">🔧 الإجراء المقترح</div><div style="color:#1E293B;margin-top:3px">'+d.action+'</div></div>':"")
+    +'</div>'
+    +photoSection
+    +'<div style="background:#F0FAF4;border-radius:10px;padding:10px 14px;margin-top:10px;text-align:center;border:1px solid #A7D7A9">'
+    +'<div style="color:#64748B;font-size:11px">📅 '+new Date().toLocaleString("ar-SA")+'</div>'
+    +'<div style="color:#64748B;font-size:11px;margin-top:2px">👤 إلى: '+toLabel+'</div>'
+    +'<div style="color:#2D5A3D;font-size:12px;font-weight:700;margin-top:5px">نظام رصد الملاحظات الميدانية</div>'
+    +'</div>'
+    +'</div>';
 }
 
 async function submitForm(){
@@ -518,7 +538,7 @@ async function submitForm(){
   const sev=SEV[selSev]?.l||"";const results=[];
   for(const t of targets){
     try{
-      await emailjs.send(SVC,TPL,{to_email:t.email,to_name:t.label,subject:"ملاحظة ["+(t.copy?"نسخة — ":"")+sev+"] — "+d.site+(d.ref?" #"+d.ref:""),message:buildMsg(d,t.label)});
+      await emailjs.send(SVC,TPL,{to_email:t.email,to_name:t.label,subject:"ملاحظة ["+(t.copy?"نسخة — ":"")+sev+"] — "+d.site+(d.ref?" #"+d.ref:""),message:buildMsg(d,t.label,photos)});
       results.push({...t,ok:true});
     }catch(e){results.push({...t,ok:false,err:String(e.text||e.message||e)});}
   }
