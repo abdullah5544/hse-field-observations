@@ -767,87 +767,15 @@ function renderDashboard(){
     +'<div class="kpi kpi-closed"><div class="kpi-icon">✅</div><div class="kpi-num">'+closed+'</div><div class="kpi-label">مغلقة</div></div>'
     +'</div>';
 
-  var af=activeFilter;
+    var af=activeFilter;
+  function mkFilter(key,lbl,cnt){
+    var cls='dash-filter'+(af===key?' active':'');
+    return '<button class="'+cls+'" onclick="setDashFilter(\''+key+'\')">'+lbl+' ('+cnt+')</button>';
+  }
   var filters='<div class="dash-filters">'
-    +'<button class="dash-filter'+(af==="all"?" active":""")+(af==="all"?"":" ")+'onclick="setDashFilter('all')">الكل ('+total+')</button>'
-    +'<button class="dash-filter'+(af==="open"?" active":"")+'" onclick="setDashFilter('open')">🔴 مفتوحة ('+open+')</button>'
-    +'<button class="dash-filter'+(af==="progress"?" active":"")+'" onclick="setDashFilter('progress')">🟡 معالجة ('+inprog+')</button>'
-    +'<button class="dash-filter'+(af==="closed"?" active":"")+'" onclick="setDashFilter('closed')">✅ مغلقة ('+closed+')</button>'
+    +mkFilter('all','الكل',total)
+    +mkFilter('open','🔴 مفتوحة',open)
+    +mkFilter('progress','🟡 معالجة',inprog)
+    +mkFilter('closed','✅ مغلقة',closed)
     +'</div>';
-
-  var cards="";
-  if(filtered.length===0){
-    cards='<div class="empty"><div style="font-size:48px">🎉</div><div style="font-weight:700;color:#334155;margin-top:12px">لا توجد ملاحظات في هذه الفئة</div></div>';
-  } else {
-    for(var i=0;i<filtered.length;i++){
-      var rec=filtered[i];
-      var realIdx=recs.indexOf(rec);
-      var sev=SEV2[rec.sev]||{l:"",c:"#999",i:""};
-      var days=ageDays(rec.createdAt);
-      var cur=rec.status||"open";
-      cards+='<div class="obs-card">'
-        +'<div class="obs-card-top">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+stLabel(cur)+ageBadge(days)+'</div>'
-        +'<div style="font-weight:800;font-size:15px;color:#0B2545;margin-bottom:3px">'+(rec.ref?"#"+rec.ref+" — ":"")+rec.site+'</div>'
-        +'<div style="font-size:12px;color:#64748B;margin-bottom:10px">'+rec.otype+'</div>'
-        +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
-        +'<span style="background:'+sev.c+'22;color:'+sev.c+';border:1px solid '+sev.c+'44;font-size:11px;padding:2px 10px;border-radius:20px;font-weight:700">'+sev.i+' '+sev.l+'</span>'
-        +'<span style="background:#F1F5F9;color:#475569;font-size:11px;padding:2px 10px;border-radius:20px">👤 '+rec.insp+'</span>'
-        +(rec.city?'<span style="background:#F1F5F9;color:#475569;font-size:11px;padding:2px 10px;border-radius:20px">🏙️ '+rec.city+'</span>':"")
-        +'</div>'
-        +'</div>'
-        +'<div class="status-bar">'
-        +'<div class="status-label">تحديث الحالة:</div>'
-        +'<div class="status-btns">'
-        +'<button class="status-btn s-open'+(cur==="open"?" active":"")+'" onclick="setStatus('+realIdx+','open')">🔴 مفتوحة</button>'
-        +'<button class="status-btn s-progress'+(cur==="progress"?" active":"")+'" onclick="setStatus('+realIdx+','progress')">🟡 معالجة</button>'
-        +'<button class="status-btn s-closed'+(cur==="closed"?" active":"")+'" onclick="setStatus('+realIdx+','closed')">✅ مغلقة</button>'
-        +'</div>'
-        +'</div>'
-        +'</div>';
-    }
-  }
-  el.innerHTML=hero+kpis+filters+cards;
-}
-function setDashFilter(f){window._dashFilter=f;renderDashboard();}
-function setStatus(idx,status){
-  recs[idx].status=status;
-  recs[idx].statusUpdated=new Date().toISOString();
-  localStorage.setItem("hse",JSON.stringify(recs));
-  renderDashboard();
-}
-
-// Stats
-function renderStats(){
-  const bySev=k=>recs.filter(r=>r.sev===k).length;
-  const types=["طفاية حريق منتهية الصلاحية","مخرج طوارئ مغلق / معطل","كابلات كهربائية مكشوفة","غياب معدات الحماية الشخصية","ملاحظة أخرى"];
-  const byType=types.map(t=>[t,recs.filter(r=>r.otype===t).length]).filter(([,n])=>n>0).sort(([,a],[,b])=>b-a);
-  g("stats-content").innerHTML=
-    '<div class="stat-grid">'+
-    [{k:"critical",l:"خطر فوري",i:"🔴"},{k:"high",l:"عالية",i:"🟧"},{k:"medium",l:"متوسطة",i:"🟨"},{k:"low",l:"منخفضة",i:"🟦"}].map(s=>
-      '<div class="stat-card" style="border-color:'+SEV[s.k].c+'30"><div style="font-size:28px">'+s.i+'</div>'+
-      '<div style="font-size:34px;font-weight:900;color:'+SEV[s.k].c+';line-height:1.1">'+bySev(s.k)+'</div>'+
-      '<div style="font-size:12px;color:#64748B;margin-top:3px">'+s.l+'</div></div>'
-    ).join("")+'</div>'+
-    '<div class="card"><div class="ct">📊 المجموع الكلي</div><div class="cb" style="align-items:center;padding:20px">'+
-    '<div style="font-size:50px;font-weight:900;color:#1B3A2D;line-height:1">'+recs.length+'</div>'+
-    '<div style="color:#64748B;margin-top:6px">إجمالي الملاحظات المسجّلة</div></div></div>'+
-    '<div class="card"><div class="ct">📋 الأنواع الأكثر رصداً</div><div class="cb">'+
-    (byType.length?byType.map(([t,n])=>'<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #F0F7F0"><span style="flex:1;font-size:13px;color:#334155">'+t+'</span><span style="background:#F0FAF4;color:#2D5A3D;border-radius:20px;padding:2px 12px;font-size:12px;font-weight:700">'+n+'</span></div>').join(""):
-    '<div style="color:#94A3B8;text-align:center;padding:16px;font-size:13px">لا بيانات</div>')+'</div></div>';
-}
-
-function clearAll(){
-  if(confirm("هل أنت متأكد من حذف جميع السجلات؟")){
-    recs=[];localStorage.setItem("hse",JSON.stringify(recs));updBadge();
-  }
-}
-
-updBadge();loadEmails();
-</script>
-<div style="text-align:center;padding:18px 20px;background:#1B3A2D;color:#fff;font-size:13px;margin-top:10px">
-  <div style="opacity:.7">مبادرة من</div>
-  <div style="font-weight:700;font-size:15px;margin-top:4px">المراقبة الميدانية هيفاء بنت درزي العنزي</div>
-</div>
-</body>
-</html>
+  >
