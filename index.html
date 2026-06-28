@@ -169,17 +169,63 @@ textarea{resize:vertical;min-height:80px}
     <div id="form-area">
 
       <div class="card"><div class="ct">🏢 بيانات الزيارة</div><div class="cb">
-        <div class="field-highlight">
-          <label>🔢 الرقم المرجعي للزيارة</label>
-          <input id="f-ref" type="text" placeholder="أدخل الرقم المرجعي يدوياً">
-        </div>
+
         <div>
-          <label>اسم الموقع / المنشأة</label>
-          <input id="f-site" type="text" placeholder="مثال: مصنع سامكو — الرياض">
+          <label>1. فرع الرقابة *</label>
+          <select id="f-branch">
+            <option value="">-- حدد إجابتك --</option>
+            <option>فرع الرياض</option><option>فرع مكة المكرمة</option><option>فرع المدينة المنورة</option>
+            <option>فرع القصيم</option><option>فرع الشرقية</option><option>فرع عسير</option>
+            <option>فرع تبوك</option><option>فرع حائل</option><option>فرع الحدود الشمالية</option>
+            <option>فرع جازان</option><option>فرع نجران</option><option>فرع الباحة</option><option>فرع الجوف</option>
+          </select>
+          <div class="err" id="e-branch">⚠ مطلوب</div>
+        </div>
+
+        <div class="field-highlight">
+          <label>2. رقم تذكرة الزيارة *</label>
+          <input id="f-ref" type="text" placeholder="أدخل إجابتك">
+          <div class="err" id="e-ref">⚠ مطلوب</div>
+        </div>
+
+        <div>
+          <label>3. رمز المحطة المميز</label>
+          <div style="font-size:11px;color:#EF4444;margin-bottom:5px">يتم تزويدكم بالرمز من خلال الجدول الاسبوعي (إن وجد)</div>
+          <input id="f-station" type="text" placeholder="أدخل إجابتك">
+        </div>
+
+        <div>
+          <label>4. تاريخ الزيارة *</label>
+          <input id="f-date" type="date">
+          <div class="err" id="e-date">⚠ مطلوب</div>
+        </div>
+
+        <div>
+          <label>5. المنطقة *</label>
+          <select id="f-region">
+            <option value="">-- حدد إجابتك --</option>
+            <option>منطقة الرياض</option><option>منطقة مكة المكرمة</option><option>منطقة المدينة المنورة</option>
+            <option>منطقة القصيم</option><option>المنطقة الشرقية</option><option>منطقة عسير</option>
+            <option>منطقة تبوك</option><option>منطقة حائل</option><option>منطقة الحدود الشمالية</option>
+            <option>منطقة جازان</option><option>منطقة نجران</option><option>منطقة الباحة</option><option>منطقة الجوف</option>
+          </select>
+          <div class="err" id="e-region">⚠ مطلوب</div>
+        </div>
+
+        <div>
+          <label>6. المدينة *</label>
+          <input id="f-city" type="text" placeholder="أدخل إجابتك">
+          <div class="err" id="e-city">⚠ مطلوب</div>
+        </div>
+
+        <div>
+          <label>7. اسم الموقع / المنشأة *</label>
+          <input id="f-site" type="text" placeholder="أدخل إجابتك">
           <div class="err" id="e-site">⚠ مطلوب</div>
         </div>
+
         <div>
-          <label>نوع الزيارة</label>
+          <label>8. نوع الزيارة *</label>
           <select id="f-vtype">
             <option value="">-- اختر نوع الزيارة --</option>
             <option>زيارة دورية</option><option>زيارة مفاجئة</option>
@@ -187,16 +233,19 @@ textarea{resize:vertical;min-height:80px}
           </select>
           <div class="err" id="e-vtype">⚠ مطلوب</div>
         </div>
+
         <div>
-          <label>👤 اسم المفتش / المراقب الميداني</label>
+          <label>9. اسم المفتش / المراقب الميداني *</label>
           <input id="f-insp" type="text" placeholder="الاسم الكامل">
           <div class="err" id="e-insp">⚠ مطلوب</div>
         </div>
+
         <div>
           <label>📧 إيميل المفتش / المراقب الميداني</label>
           <input id="f-insp-email" type="email" placeholder="inspector@company.com" style="direction:ltr;text-align:left">
           <div style="font-size:11px;color:#2D5A3D;margin-top:3px">سيصله نسخة تلقائية من الملاحظة</div>
         </div>
+
       </div></div>
 
       <div class="card"><div class="ct">📍 الموقع الجغرافي</div><div class="cb">
@@ -222,10 +271,11 @@ textarea{resize:vertical;min-height:80px}
         <div><label>نوع الملاحظة</label>
           <select id="f-otype">
             <option value="">-- اختر نوع الملاحظة --</option>
-            <option>طفاية حريق منتهية الصلاحية</option><option>مخرج طوارئ مغلق / معطل</option>
-            <option>كابلات كهربائية مكشوفة</option><option>تسرب سوائل / مواد</option>
-            <option>سقالة غير آمنة</option><option>غياب معدات الحماية الشخصية</option>
-            <option>إضاءة غير كافية</option><option>انسداد ممرات الإخلاء</option><option>ملاحظة أخرى</option>
+            <option>طفاية حريق منتهية الصلاحية</option>
+            <option>مخرج طوارئ مغلق / معطل</option>
+            <option>كابلات كهربائية مكشوفة</option>
+            <option>غياب معدات الحماية الشخصية</option>
+            <option>ملاحظة أخرى</option>
           </select>
           <div class="err" id="e-otype">⚠ مطلوب</div></div>
         <div><label>وصف الملاحظة التفصيلي</label>
@@ -492,6 +542,8 @@ function updPreview(){
 function validate(){
   let ok=true;
   function chk(f,e){if(!g(f)?.value.trim()){g(e).style.display="block";ok=false;}else g(e).style.display="none";}
+  chk("f-branch","e-branch");chk("f-ref","e-ref");chk("f-date","e-date");
+  chk("f-region","e-region");chk("f-city","e-city");
   chk("f-site","e-site");chk("f-vtype","e-vtype");chk("f-insp","e-insp");chk("f-otype","e-otype");chk("f-odesc","e-odesc");
   if(!selSev){g("e-sev").style.display="block";ok=false;}else g("e-sev").style.display="none";
   const any=RCPS.some(r=>g("em-"+r.id)?.value.trim())||g("f-insp-email")?.value.trim();
@@ -542,7 +594,10 @@ async function submitForm(){
   if(!validate())return;
   const btn=g("btn-sub");btn.disabled=true;btn.textContent="⏳ جارٍ الإرسال...";
   const d={
-    ref:g("f-ref").value.trim(),site:g("f-site").value.trim(),vtype:g("f-vtype").value.trim(),
+    branch:g("f-branch").value.trim(),ref:g("f-ref").value.trim(),
+    station:g("f-station").value.trim(),date:g("f-date").value.trim(),
+    region:g("f-region").value.trim(),city:g("f-city").value.trim(),
+    site:g("f-site").value.trim(),vtype:g("f-vtype").value.trim(),
     insp:g("f-insp").value.trim(),inspEmail:g("f-insp-email").value.trim(),
     gps:g("gps-val").classList.contains("set")?g("gps-val").textContent:"",
     loc:g("f-locdesc").value.trim(),otype:g("f-otype").value.trim(),
@@ -575,8 +630,8 @@ async function submitForm(){
 
 function resetForm(){
   g("send-result").style.display="none";g("form-area").style.display="block";
-  ["f-ref","f-site","f-insp","f-insp-email","f-locdesc","f-otype","f-odesc","f-action"].forEach(id=>g(id).value="");
-  g("f-vtype").value="";photos=[];selSev="";
+  ["f-ref","f-station","f-date","f-city","f-site","f-insp","f-insp-email","f-locdesc","f-otype","f-odesc","f-action"].forEach(id=>{if(g(id))g(id).value="";});
+  ["f-branch","f-region","f-vtype"].forEach(id=>{if(g(id))g(id).value="";});photos=[];selSev="";
   ["low","medium","high","critical"].forEach(s=>g("sev-"+s).className="sev-btn");
   g("photo-grid").innerHTML="";g("preview").style.display="none";
   g("gps-txt").textContent="اضغط لتحديد الموقع";g("gps-val").textContent="لم يتم التحديد بعد";
@@ -626,7 +681,7 @@ function delRec(){recs.splice(viewIdx,1);localStorage.setItem("hse",JSON.stringi
 // Stats
 function renderStats(){
   const bySev=k=>recs.filter(r=>r.sev===k).length;
-  const types=["طفاية حريق منتهية الصلاحية","مخرج طوارئ مغلق / معطل","كابلات كهربائية مكشوفة","تسرب سوائل / مواد","سقالة غير آمنة","غياب معدات الحماية الشخصية","إضاءة غير كافية","انسداد ممرات الإخلاء","ملاحظة أخرى"];
+  const types=["طفاية حريق منتهية الصلاحية","مخرج طوارئ مغلق / معطل","كابلات كهربائية مكشوفة","غياب معدات الحماية الشخصية","ملاحظة أخرى"];
   const byType=types.map(t=>[t,recs.filter(r=>r.otype===t).length]).filter(([,n])=>n>0).sort(([,a],[,b])=>b-a);
   g("stats-content").innerHTML=
     '<div class="stat-grid">'+
