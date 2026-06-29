@@ -522,48 +522,59 @@ function validate(){
 
 // ── Build Email ──────────────────────────────────────────────────────
 function buildMsg(d,toLabel,imgs){
-  var sev=SEV[d.sev]&&SEV[d.sev].l||"";
-  var sevI=SEV[d.sev]&&SEV[d.sev].i||"";
+  var sev=SEV[selSev]&&SEV[selSev].l||"";
   var sevC={low:"#3B82F6",medium:"#EAB308",high:"#F97316",critical:"#EF4444"}[d.sev]||"#64748B";
   var photoSec=imgs&&imgs.length
-    ? '<div style="background:#FFF9C4;border-radius:12px;padding:14px;margin-top:12px;border:2px solid #F59E0B"><div style="font-weight:700;color:#92400E;margin-bottom:6px">📷 الصور المرفقة</div><div style="background:#fff;border-radius:8px;padding:10px;display:flex;align-items:center;gap:10px"><span style="font-size:28px">🖼️</span><div><div style="font-weight:700;color:#1B3A2D;font-size:15px">'+imgs.length+' صورة مرفقة</div><div style="color:#64748B;font-size:12px">محفوظة في السجل — يمكن الاطلاع عليها في الموقع</div></div></div></div>'
+    ? '<div style="background:#FFF9C4;border-radius:10px;padding:14px;margin-top:12px;border:2px solid #F59E0B">'
+      +'<div style="font-weight:700;color:#92400E;margin-bottom:6px">الصور المرفقة</div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;color:#1B3A2D;font-weight:700;font-size:15px">'+imgs.length+' صورة مرفقة</div>'
+      +'<div style="color:#64748B;font-size:12px;margin-top:4px">محفوظة في السجل - يمكن الاطلاع عليها في الموقع</div></div>'
     : "";
-  function row(icon,lbl,val){return val?'<div style="margin-bottom:7px"><div style="color:#64748B;font-size:11px">'+lbl+'</div><div style="font-weight:600;color:#1E293B">'+val+'</div></div>':"";}
+  function row(lbl,val){
+    return val
+      ? '<div style="margin-bottom:8px"><div style="color:#888;font-size:11px">'+lbl+'</div><div style="font-weight:600;color:#1E293B;font-size:14px">'+val+'</div></div>'
+      : "";
+  }
   return '<div dir="rtl" style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#F4F7F4;padding:16px;border-radius:12px">'
+    // Header
     +'<div style="background:linear-gradient(135deg,#1B3A2D,#2D5A3D);color:#fff;padding:18px;border-radius:12px;margin-bottom:14px;text-align:center">'
-    +'<div style="font-size:22px">🦺</div><div style="font-size:17px;font-weight:800;margin-top:6px">ملاحظة ميدانية جديدة</div>'
-    +'<div style="font-size:11px;opacity:.8;margin-top:3px">HSE Field Observation System</div></div>'
-    +'<div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #E2E8F0">'
-    +'<div style="font-weight:700;color:#1B3A2D;font-size:13px;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #E8F0E8">بيانات الزيارة</div>'
-    +row("🏛️","فرع الرقابة",d.branch)
-    +row("🎫","رقم التذكرة",d.ref?"#"+d.ref:"")
-    +row("⚡","رمز المحطة",d.station)
-    +row("📅","تاريخ الزيارة",d.date)
-    +row("🗺️","المنطقة",d.region)
-    +row("🏙️","المدينة",d.city)
-    +row("📍","الموقع",d.site)
-    +row("🗂️","نوع الزيارة",d.vtype)
-    +row("👤","المفتش",d.insp)
-    +(d.gps?row("📌","الإحداثيات",d.gps):"")
-    +(d.loc?row("📝","وصف الموقع",d.loc):"")
+    +'<div style="font-size:18px;font-weight:800">ملاحظة ميدانية جديدة</div>'
+    +'<div style="font-size:11px;opacity:.8;margin-top:4px">HSE Field Observation System</div>'
     +'</div>'
-    +'<div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:2px solid '+sevC+'40">'
-    +'<div style="font-weight:700;color:#1B3A2D;font-size:13px;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #E8F0E8">تفاصيل الملاحظة</div>'
-    +row("","النوع",d.otype)
-    +'<div style="margin-bottom:10px"><div style="color:#64748B;font-size:11px">الوصف</div><div style="color:#1E293B;line-height:1.6">'+d.odesc+'</div></div>'
+    // Visit Data
+    +'<div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:10px;border:1px solid #E2E8F0">'
+    +'<div style="font-weight:700;color:#1B3A2D;font-size:13px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #E8F0E8">بيانات الزيارة</div>'
+    +row("فرع الرقابة",d.branch)
+    +row("رقم التذكرة",d.ref?"#"+d.ref:"")
+    +row("رمز المحطة",d.station)
+    +row("تاريخ الزيارة",d.date)
+    +row("المنطقة",d.region)
+    +row("المدينة",d.city)
+    +row("الموقع",d.site)
+    +row("نوع الزيارة",d.vtype)
+    +(d.gps?row("الإحداثيات",d.gps):"")
+    +(d.loc?row("وصف الموقع",d.loc):"")
+    +'</div>'
+    // Observation
+    +'<div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:10px;border:2px solid '+sevC+'40">'
+    +'<div style="font-weight:700;color:#1B3A2D;font-size:13px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #E8F0E8">تفاصيل الملاحظة</div>'
+    +row("النوع",d.otype)
+    +'<div style="margin-bottom:10px"><div style="color:#888;font-size:11px">الوصف</div><div style="color:#1E293B;line-height:1.6;font-size:14px">'+d.odesc+'</div></div>'
     +'<div style="background:'+sevC+'15;border:2px solid '+sevC+'50;border-radius:10px;padding:10px 14px;display:inline-block">'
-    +'<span style="color:'+sevC+';font-weight:800;font-size:16px">'+sevI+' '+sev+'</span></div>'
-    +(d.action?'<div style="margin-top:10px"><div style="color:#64748B;font-size:11px">الإجراء المقترح</div><div style="color:#1E293B;margin-top:3px">'+d.action+'</div></div>':"")//'+row("🔧","الإجراء المقترح",d.action)+'</div>':"")
+    +'<span style="color:'+sevC+';font-weight:800;font-size:15px">'+sev+'</span></div>'
+    +(d.action?'<div style="margin-top:10px">'+row("الإجراء المقترح",d.action)+'</div>':"")
     +'</div>'
     +photoSec
+    // Footer
     +'<div style="background:#F0FAF4;border-radius:10px;padding:10px 14px;margin-top:10px;text-align:center;border:1px solid #A7D7A9">'
-    +'<div style="color:#64748B;font-size:11px">📅 '+new Date().toLocaleString("ar-SA")+'</div>'
-    +'<div style="color:#64748B;font-size:11px;margin-top:2px">👤 إلى: '+toLabel+'</div>'
+    +'<div style="color:#64748B;font-size:11px">'+new Date().toLocaleString("ar-SA")+'</div>'
+    +'<div style="color:#64748B;font-size:11px;margin-top:2px">الى: '+toLabel+'</div>'
     +'<div style="color:#2D5A3D;font-size:12px;font-weight:700;margin-top:5px">نظام رصد الملاحظات الميدانية</div>'
-    +'</div></div>';
+    +'</div>'
+    +'</div>';
 }
 
-// ── Submit ──────────────────────────────────────────────────────
+
 function submitForm(){
   if(!validate()) return;
   var btn=g("btn-sub");btn.disabled=true;btn.textContent="⏳ جارٍ الإرسال...";
