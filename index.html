@@ -616,7 +616,11 @@ function submitForm(){
     var rec={branch:d.branch,ref:d.ref,station:d.station,date:d.date,region:d.region,city:d.city,site:d.site,vtype:d.vtype,insp:d.insp,gps:d.gps,loc:d.loc,otype:d.otype,odesc:d.odesc,sev:selSev,action:d.action,
       id:Date.now(),createdAt:new Date().toISOString(),photos:photos.slice(),emailResults:results,status:"open"};
     recs.unshift(rec);
-    fetch(GAS_URL,{method:"POST",body:JSON.stringify({action:"save",record:rec})}).catch(function(){});
+    // Save without photos (too large for Sheets)
+    var recToSave=Object.assign({},rec);
+    recToSave.photos=[];
+    recToSave.photoCount=photos.length;
+    fetch(GAS_URL,{method:"POST",body:JSON.stringify({action:"save",record:recToSave})}).catch(function(){});
     var anyOk=results.some(function(r){return r.ok;});
     var rb=g("send-result");rb.className="result-box "+(anyOk?"ok":"fail");rb.style.display="block";
     g("result-title").textContent=anyOk?"✅ تم الإرسال بنجاح!":"❌ فشل الإرسال";
@@ -801,14 +805,18 @@ function clearAllData(){
 
 // ── Init ──────────────────────────────────────────────────────
 function loadRecords(){
-  var el=g("records-content");
   fetch(GAS_URL)
     .then(function(r){return r.json();})
     .then(function(res){
       if(res.status==="ok"){recs=res.records||[];}
+      else{recs=[];}
       loadEmails();
     })
-    .catch(function(){loadEmails();});
+    .catch(function(e){
+      console.log("Load error:",e);
+      recs=[];
+      loadEmails();
+    });
 }
 loadRecords();
 </script>
