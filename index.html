@@ -362,7 +362,16 @@ function goTab(t){
 }
 
 function openLocked(t){
-  if(unlocked){goTab(t);return;}
+  if(unlocked){
+    fetch(GAS_URL)
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(res.status==="ok") recs=res.records||[];
+        goTab(t);
+      })
+      .catch(function(){goTab(t);});
+    return;
+  }
   pendTab=t;
   pinBuf="";
   updDots();
@@ -388,7 +397,14 @@ function checkPin(){
     g("overlay").classList.remove("show");
     clearTimeout(lockTmr);
     lockTmr=setTimeout(function(){unlocked=false;},10*60*1000);
-    goTab(pendTab);
+    // Load fresh data from server then show tab
+    fetch(GAS_URL)
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(res.status==="ok") recs=res.records||[];
+        goTab(pendTab);
+      })
+      .catch(function(){goTab(pendTab);});
   } else {
     g("pin-main").classList.add("shake");
     g("pin-err").textContent="❌ رقم سري خاطئ";
