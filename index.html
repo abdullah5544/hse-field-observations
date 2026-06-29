@@ -323,7 +323,7 @@ textarea{resize:vertical;min-height:80px}
 
 <script>
 // ── Config ──────────────────────────────────────────────────────
-var GAS_URL="https://script.google.com/macros/s/AKfycbyY-Zjml1w-sQYFuYulXfRxme8VXA302KgC3lnrTN68neWZXlLiApKCfmRxeCettBVH/exec";
+var GAS_URL="https://script.google.com/macros/s/AKfycbyNJ-rRKheXnLyezdaKx1RikYTw_Wryizd1QHekho2ljjFEWs-o556-DfF6U19MqRT3/exec";
 var SEV={
   low:    {l:"منخفضة",  c:"#3B82F6",i:"🟦"},
   medium: {l:"متوسطة",  c:"#EAB308",i:"🟨"},
@@ -336,7 +336,7 @@ var RCPS=[
   {id:"monitor",  label:"المراقب",       icon:"👁️"},
   {id:"safety",   label:"مسؤول السلامة", icon:"🦺"}
 ];
-var recs=JSON.parse(localStorage.getItem("hse")||"[]");
+var recs=[];
 var photos=[], selSev="", viewIdx=-1;
 var pinBuf="", pendTab="", unlocked=false, lockTmr=null;
 var dashFilter="all";
@@ -615,7 +615,8 @@ function submitForm(){
   function done(results){
     var rec={branch:d.branch,ref:d.ref,station:d.station,date:d.date,region:d.region,city:d.city,site:d.site,vtype:d.vtype,insp:d.insp,gps:d.gps,loc:d.loc,otype:d.otype,odesc:d.odesc,sev:selSev,action:d.action,
       id:Date.now(),createdAt:new Date().toISOString(),photos:photos.slice(),emailResults:results,status:"open"};
-    recs.unshift(rec);localStorage.setItem("hse",JSON.stringify(recs));
+    recs.unshift(rec);
+    fetch(GAS_URL,{method:"POST",body:JSON.stringify({action:"save",record:rec})}).catch(function(){});
     var anyOk=results.some(function(r){return r.ok;});
     var rb=g("send-result");rb.className="result-box "+(anyOk?"ok":"fail");rb.style.display="block";
     g("result-title").textContent=anyOk?"✅ تم الإرسال بنجاح!":"❌ فشل الإرسال";
@@ -647,6 +648,7 @@ function resetForm(){
 function renderRecords(){
   var el=g("records-content");
   if(viewIdx>=0){renderDetail(el);return;}
+  if(!recs.length && el.innerHTML===""){el.innerHTML='<div style="text-align:center;padding:40px;color:#94A3B8"><div style="font-size:30px">⏳</div><div style="margin-top:8px">جارٍ التحميل...</div></div>';fetch(GAS_URL).then(function(r){return r.json();}).then(function(res){if(res.status==="ok"){recs=res.records||[];}renderRecords();}).catch(function(){renderRecords();});return;}
   if(!recs.length){
     el.innerHTML='<div class="empty-state"><div style="font-size:50px">📋</div><div style="font-weight:700;color:#334155;margin-top:12px;font-size:15px">لا توجد ملاحظات بعد</div><div style="color:#94A3B8;font-size:13px;margin-top:6px">أضف أول ملاحظة من تبويب + جديدة</div></div>';
     return;
@@ -682,7 +684,11 @@ function renderDetail(el){
     +(rec.photos&&rec.photos.length?'<div class="detail-row"><div style="font-size:11px;color:#94A3B8;margin-bottom:8px">📷 الصور</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+rec.photos.map(function(p){return '<img src="'+p.u+'" style="width:85px;height:85px;object-fit:cover;border-radius:10px;border:2px solid #E2E8F0">';}).join("")+'</div></div>':"")
     +'<button class="btn-del" onclick="delRec()">🗑 حذف هذه الملاحظة</button>';
 }
-function delRec(){recs.splice(viewIdx,1);localStorage.setItem("hse",JSON.stringify(recs));viewIdx=-1;renderRecords();}
+function delRec(){
+  var rec=recs[viewIdx];
+  fetch(GAS_URL,{method:"POST",body:JSON.stringify({action:"delete",id:rec.id})}).catch(function(){});
+  recs.splice(viewIdx,1);viewIdx=-1;renderRecords();
+}
 
 // ── Dashboard ──────────────────────────────────────────────────────
 function renderDashboard(){
@@ -759,7 +765,11 @@ function renderDashboard(){
     +'</div>'+cards;
 }
 function setDF(f){dashFilter=f;renderDashboard();}
-function setStatus(idx,s){recs[idx].status=s;localStorage.setItem("hse",JSON.stringify(recs));renderDashboard();}
+function setStatus(idx,s){
+  var rec=recs[idx];rec.status=s;
+  fetch(GAS_URL,{method:"POST",body:JSON.stringify({action:"update_status",id:rec.id,status:s})}).catch(function(){});
+  renderDashboard();
+}
 
 // ── Stats ──────────────────────────────────────────────────────
 function renderStats(){
@@ -785,12 +795,22 @@ function renderStats(){
 
 function clearAllData(){
   if(confirm("هل أنت متأكد من حذف جميع السجلات؟")){
-    recs=[];localStorage.setItem("hse",JSON.stringify(recs));
+    recs=[];
   }
 }
 
 // ── Init ──────────────────────────────────────────────────────
-loadEmails();
+function loadRecords(){
+  var el=g("records-content");
+  fetch(GAS_URL)
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(res.status==="ok"){recs=res.records||[];}
+      loadEmails();
+    })
+    .catch(function(){loadEmails();});
+}
+loadRecords();
 </script>
 </body>
 </html>
