@@ -593,13 +593,14 @@ function submitForm(){
   var sev=SEV[selSev]&&SEV[selSev].l||"";
   var subj="ملاحظة ["+sev+"] — "+d.site+(d.ref?" #"+d.ref:"");
   var imgData=photos.map(function(p){return p.u;});
-  fetch("https://script.google.com/macros/s/AKfycbyY-Zjml1w-sQYFuYulXfRxme8VXA302KgC3lnrTN68neWZXlLiApKCfmRxeCettBVH/exec", {
+  fetch(GAS_URL, {
     method:"POST",
     body:JSON.stringify({
       subject: subj,
       message: buildMsg(d,"الجميع",photos),
       recipients: targets,
-      images: imgData
+      images: imgData,
+      record: {branch:d.branch,ref:d.ref,station:d.station,date:d.date,region:d.region,city:d.city,site:d.site,vtype:d.vtype,gps:d.gps,loc:d.loc,otype:d.otype,odesc:d.odesc,sev:selSev,action:d.action,id:Date.now(),createdAt:new Date().toISOString(),status:"open",photoCount:photos.length}
     })
   })
   .then(function(r){return r.json();})
